@@ -1,0 +1,41 @@
+@layer components {
+  :not(.dark) .aside {
+    @apply bg-white text-zinc-800 border-r border-zinc-200/90;
+  }
+
+  :not(.dark) .aside-scrollbars {
+    @apply aside-scrollbars-[slate];
+  }
+
+  :not(.dark) .aside-menu-item {
+    @apply text-zinc-700 hover:text-indigo-600 hover:bg-zinc-100 transition-all duration-200 mx-3 my-1 rounded-xl px-4 font-semibold;
+  }
+
+  :not(.dark) .aside-menu-item-active {
+    @apply font-bold text-white bg-indigo-600 shadow-md shadow-indigo-600/20;
+  }
+
+  :not(.dark) .aside-menu-item-active-style {
+    @apply bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-bold hover:bg-indigo-700;
+  }
+
+  .aside-menu-dropdown {
+    @apply bg-zinc-100/80 dark:bg-slate-950/70 border border-zinc-200/80 dark:border-slate-800/80 rounded-xl my-1 p-1 shadow-inner backdrop-blur-sm;
+  }
+
+  :not(.dark) .navbar-item-label {
+    @apply text-zinc-700;
+  }
+
+  :not(.dark) .navbar-item-label-hover {
+    @apply hover:text-indigo-600;
+  }
+
+  :not(.dark) .navbar-item-label-active {
+    @apply text-indigo-600;
+  }
+
+  :not(.dark) .overlay {
+    @apply from-zinc-100/80 via-zinc-100/95 to-zinc-100/80;
+  }
+}

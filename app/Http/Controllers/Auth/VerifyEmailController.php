@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\RedirectResponse;
+
+class VerifyEmailController extends Controller
+{
+    /**
+     * Mark the authenticated user's email address as verified.
+     */
+    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            if ($user->hasAnyRole(['admin', 'super-admin', 'tamu', 'BK', 'bk', 'bendahara'])) {
+                return redirect()->route('admin.dashboard');
+            }
+            if ($user->hasRole('siswa')) {
+                return redirect()->route('siswa.dashboard');
+            }
+            if ($user->hasRole('pembimbing')) {
+                return redirect()->route('pembimbing.dashboard');
+            }
+
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        if ($user->hasAnyRole(['admin', 'super-admin', 'tamu', 'BK', 'bk', 'bendahara'])) {
+            return redirect()->route('admin.dashboard', ['verified' => 1]);
+        }
+        if ($user->hasRole('siswa')) {
+            return redirect()->route('siswa.dashboard', ['verified' => 1]);
+        }
+        if ($user->hasRole('pembimbing')) {
+            return redirect()->route('pembimbing.dashboard', ['verified' => 1]);
+        }
+
+        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+    }
+}

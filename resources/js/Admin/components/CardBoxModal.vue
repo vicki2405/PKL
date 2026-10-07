@@ -1,0 +1,125 @@
+<script setup>
+import { computed, watch, onUnmounted } from 'vue'
+import { mdiClose } from '@mdi/js'
+import BaseButton from '@admin/components/BaseButton.vue'
+import BaseButtons from '@admin/components/BaseButtons.vue'
+import CardBox from '@admin/components/CardBox.vue'
+import OverlayLayer from '@admin/components/OverlayLayer.vue'
+import CardBoxComponentTitle from '@admin/components/CardBoxComponentTitle.vue'
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  button: {
+    type: String,
+    default: 'info',
+  },
+  buttonLabel: {
+    type: String,
+    default: 'Done',
+  },
+  hasCancel: Boolean,
+  modelValue: {
+    type: [String, Number, Boolean],
+    default: null,
+  },
+  modalClass: {
+    type: String,
+    default: 'w-11/12 md:w-3/5 lg:w-2/5 xl:w-4/12',
+  },
+  closeOnConfirm: {
+    type: Boolean,
+    default: true,
+  },
+})
+
+const emit = defineEmits(['update:modelValue', 'cancel', 'confirm'])
+
+const value = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+})
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    let styleTag = document.getElementById('modal-scroll-lock')
+    if (newValue) {
+      if (!styleTag) {
+        styleTag = document.createElement('style')
+        styleTag.id = 'modal-scroll-lock'
+        styleTag.innerHTML = 'html, body, #app { overflow: hidden !important; }'
+        document.head.appendChild(styleTag)
+      }
+    } else {
+      if (styleTag) {
+        styleTag.remove()
+      }
+    }
+  },
+  { immediate: true }
+)
+
+onUnmounted(() => {
+  const styleTag = document.getElementById('modal-scroll-lock')
+  if (styleTag) {
+    styleTag.remove()
+  }
+})
+
+const confirmCancel = (mode) => {
+  if (mode === 'confirm' && !props.closeOnConfirm) {
+    emit(mode)
+    return
+  }
+  value.value = false
+  emit(mode)
+}
+
+const confirm = () => confirmCancel('confirm')
+
+const cancel = () => confirmCancel('cancel')
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && value.value) {
+    cancel()
+  }
+})
+</script>
+
+<template>
+  <OverlayLayer v-show="value" @overlay-click="cancel">
+    <CardBox
+      v-show="value"
+      class="shadow-2xl max-h-[90vh] z-50 overflow-hidden w-full mx-auto my-auto rounded-2xl border border-slate-200/80 dark:border-slate-800"
+      :class="modalClass"
+      is-modal
+    >
+      <CardBoxComponentTitle :title="title">
+        <BaseButton
+          v-if="hasCancel"
+          :icon="mdiClose"
+          color="whiteDark"
+          small
+          rounded-full
+          @click.prevent="cancel"
+        />
+      </CardBoxComponentTitle>
+
+      <div class="space-y-3 max-h-[calc(90vh-140px)] overflow-y-auto pr-1">
+        <slot />
+      </div>
+
+      <template #footer>
+        <slot name="footer">
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <BaseButton v-if="hasCancel" label="Cancel" color="whiteDark" :auto-permission="false" @click="cancel" />
+            <BaseButton :label="buttonLabel" :color="button" :auto-permission="false" @click="confirm" />
+          </div>
+        </slot>
+      </template>
+    </CardBox>
+  </OverlayLayer>
+</template>
